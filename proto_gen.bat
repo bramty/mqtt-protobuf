@@ -1,0 +1,1 @@
+protoc --proto_path=proto_files --python_out=proto_files proto_files/send.proto proto_files/receive.proto

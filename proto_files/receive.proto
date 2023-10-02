@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+message r_payload {
+    string id = 1;
+    string timestamp = 2;
+    string ret = 3;
+}
