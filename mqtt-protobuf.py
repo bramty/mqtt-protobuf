@@ -1,7 +1,6 @@
 import random
 import time
 from time import strftime
-import keyboard
 import warnings
 
 from paho.mqtt import client as mqtt_client
@@ -46,6 +45,9 @@ class QueueItemType(Enum):
 _q_ack = queue.Queue()
 _q_subscribe = queue.Queue()
 
+# Limiting the number of subscribe
+MAX_COUNT = 30
+
 def connect_mqtt(client_id):
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
@@ -86,10 +88,11 @@ def execPublish():
     print("Thread Publish Start!")
     client = connect_mqtt(client_id_pub)
     client.loop_start()
+    count = 0
 
     while True:
         time.sleep(0.5)
-        if keyboard.is_pressed("q"):            
+        if count >= MAX_COUNT:            
             _q_ack.put_nowait([QueueItemType.UserQuit])
             _q_subscribe.put_nowait([QueueItemType.UserQuit])
             break
@@ -97,6 +100,7 @@ def execPublish():
             t_msg.timestamp = strftime("%d%m%y%I%M%S%p")
             t_msg.msg = "test"
             publish(client, t_msg.SerializeToString(), topic_pub)
+            count = count + 1
             
     client.loop_stop()  
 
@@ -107,8 +111,6 @@ def execSubscribe():
     client.loop_start()
 
     while True:
-        time.sleep(0.5)
-
         # Dequeue an item
         qitem = _q_subscribe.get()
         

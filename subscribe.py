@@ -1,7 +1,6 @@
 import random
 import time
 from time import strftime
-import keyboard
 
 from paho.mqtt import client as mqtt_client
 
@@ -22,11 +21,12 @@ r_msg.ret = ""
 
 broker = 'broker.emqx.io'
 port = 1883
-topic = "ascube/pub"
+topic = "test/pub"
 # Generate a Client ID with the subscribe prefix.
 client_id = f'grpd-{random.randint(0, 100)}'
-# username = 'emqx'
-# password = 'public'
+
+# Limiting the number of subscribe
+MAX_COUNT = 30
 
 def connect_mqtt() -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
@@ -55,18 +55,16 @@ def subscribe(client: mqtt_client):
 def run():
     client = connect_mqtt()
     subscribe(client)
+    count = 0
     client.loop_start()
 
     while True:
-        if keyboard.is_pressed("q"):            
+        if count >= MAX_COUNT:            
             break
         else:
             time.sleep(1)
-            print("Receive protobuf class:")
-            print(f"id:`{r_msg.id}`\n")
-            print(f"timestamp:`{r_msg.timestamp}`\n")
-            print(f"return:`{r_msg.ret}`\n")
-            
+            count = count + 1
+       
     client.loop_stop()
 
 if __name__ == '__main__':

@@ -1,7 +1,6 @@
 import random
 import time
 from time import strftime
-import keyboard
 
 from paho.mqtt import client as mqtt_client
 
@@ -20,8 +19,9 @@ topic = "test/pub"
 timeout = 60
 # Generate a Client ID with the publish prefix.
 client_id = f'grpd-{random.randint(0, 100)}'
-# username = 'emqx'
-# password = 'public'
+
+# Limiting the number of publish
+MAX_COUNT = 30
 
 def connect_mqtt():
     def on_connect(client, userdata, flags, rc):
@@ -49,15 +49,17 @@ def publish(client, msg):
 def run():
     client = connect_mqtt()
     client.loop_start()
+    count = 0
 
     while True:
         time.sleep(0.5)
-        if keyboard.is_pressed("q"):            
+        if count >= MAX_COUNT:            
             break
         else:
             t_msg.timestamp = strftime("%d%m%y%I%M%S%p")
             t_msg.msg = "test"
             publish(client, t_msg.SerializeToString())
+            count = count + 1
             
     client.loop_stop()
 
